@@ -14,7 +14,10 @@ export default function AuthPage() {
   const handleShowLogin=()=>setModalShow("Login")
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
-  const [authToken,setAuthToken]=useLocalStorage("authToken","")
+  const [authToken, setAuthToken] = useLocalStorage("authToken", "")
+  
+  const [signUpError, setSignUpError] = useState("")
+  const[loginError,setLoginError]=useState("")
   
   const navigate = useNavigate()
   
@@ -22,7 +25,8 @@ export default function AuthPage() {
     if (authToken) {
       navigate("/profile")
     }
-  },[authToken,navigate])
+  }, [authToken, navigate])
+  
   const handleSignUp = async (e) => {
     e.preventDefault()
     try {
@@ -35,10 +39,15 @@ export default function AuthPage() {
       */
       //using awai tot ask javascript to wait fot the server to send a response back bafore continuing the code
       const res = await axios.post(`${url}/signup`, { username, password })
-      console.log(res)
-      console.log(res.data)
+      // console.log(res)
+      console.log(res.data.message)
     } catch (error) {
       console.error(error)
+      if (error.response.data.message) {
+        setSignUpError(error.response.data.message)
+      } else {
+        setSignUpError("An error occurred during sign-up. Please try again.")
+      }
     }
   }
 
@@ -52,7 +61,12 @@ export default function AuthPage() {
         console.log('Login was sucessfully,token saved')
     }
     } catch (error) {
-      console.error(error)
+     console.error(error)
+      if (error.response.data.auth === false) {
+        setLoginError(" password is incorrect")
+      } else {
+        setLoginError(error.data.message)
+      }
     }
   }
   const handleClose=()=>setModalShow(null)
@@ -111,6 +125,23 @@ export default function AuthPage() {
                 onChange={(e)=>setPassword(e.target.value)}
                   type="password" placeholder="Password" />
               </Form.Group>
+
+               {/*
+               the && operator will allow the JSX expression
+                (<p style={{ color: "red", fontSize: "14px" }}>{signUpError}</p>) 
+                to be rendered.
+               */}
+              {modalShow === "SignUp" && signUpError  && (
+                <p style={{ color: "red", fontSize: "14px" }}>
+                  {signUpError}
+                </p>
+              )}
+              
+              {modalShow === 'Login' && loginError && (
+                <p style={{ color: "red", fontSize: "14px" }}>
+                  {loginError}
+                </p>
+              )}
             
             <p style={{fontSize:"12px"}}>
               By signing up, you agree to the Terms of Service and Privacy Policy, including Cookie Use.
