@@ -42,6 +42,8 @@ export default function AuthPage() {
       // console.log(res)
       console.log(res.data.message)
     } catch (error) {
+      /*when the response in api return with 400 status code, 
+      axios detect 400 status code and throw an error*/ 
       console.error(error)
       if (error.response.data.message) {
         setSignUpError(error.response.data.message)
@@ -63,9 +65,11 @@ export default function AuthPage() {
     } catch (error) {
      console.error(error)
       if (error.response.data.auth === false) {
+        //if password is incorrect
         setLoginError(" password is incorrect")
       } else {
-        setLoginError(error.data.message)
+        //if username is incorrect
+        setLoginError(error.response.data.message)
       }
     }
   }
