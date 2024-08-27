@@ -1,22 +1,20 @@
 import { jwtDecode } from "jwt-decode"
-import{useEffect,useState} from"react"
-import { Button, Col, Image, Nav, Row } from "react-bootstrap"
+import{useEffect} from"react"
+import { Button, Col, Image, Nav, Row, Spinner,  } from "react-bootstrap"
 import ProfilePostCard from "./ProfilePostCard"
+import { useDispatch, useSelector } from "react-redux"
+import { fetchPostsByUser } from "../features/posts/postsSlice"
+
 
 export default function ProfileMidBody() {
-  const [posts,setPosts]=useState([])
   const url = "https://pbs.twimg.com/profile_banners/83072625/1602845571/1500x500"
   const pic="https://pbs.twimg.com/profile_images/1587405892437221376/h167Jlb2_400x400.jpg"
 
-  //fetch posts based on user id
-  const fetchPosts = (userId) => {
-    fetch(
-      `https://8eaa8410-8c12-4b53-96ad-011b16a18d90-00-22end3v4blroq.spock.replit.dev/posts/user/${userId}`
-    )
-      .then((response) =>  response.json() )
-      .then((data) => setPosts(data))
-    .catch((error)=>console.error("Error:",error))
-  }
+  const dispatch = useDispatch()
+  const posts = useSelector((state) => state.posts.posts)
+  const loading = useSelector((state) => state.posts.loading)
+  console.log(posts)
+ 
 
   useEffect(() => {
     //localsTorage : get current local storage of web browser
@@ -24,14 +22,15 @@ export default function ProfileMidBody() {
     if (token) {
       const decodedToken = jwtDecode(token)
       //the payload pass in by user to generate token included id
-      const userId = decodedToken.id
-      console.log(userId)
-      fetchPosts(userId)
+      const user_Id = decodedToken.id
+      console.log(user_Id)
+      dispatch(fetchPostsByUser(user_Id))
+
     }
-  },[])
+  },[dispatch])
   return (
     <Col sm={6} className="bg-light" style={{ border: "1px solid lightgrey" }}>
-      <Image src={url} fluid />
+      <Image src={url} fluid />{/*fluid spanning the the entire width*/}
       <br />
       <Image
         src={pic}
@@ -66,7 +65,8 @@ export default function ProfileMidBody() {
       <p>
         <strong>271</strong> Following <strong>610</strong> Followers
       </p>
-   
+
+      {/*justify prop makes the navigation items fill the entire width of the container, distributing the space evenly among all the items. */}
       <Nav variant="underline" defaultActiveKey="/home" justify>
         <Nav.Item>
           <Nav.Link eventKey="/home">Tweets</Nav.Link>
@@ -84,9 +84,16 @@ export default function ProfileMidBody() {
           <Nav.Link eventKey="link-4">Likes</Nav.Link>
         </Nav.Item>
       </Nav>
-      {posts.length>0 && posts.map((post) => (
-      <ProfilePostCard key={post.id} content={post.content}/>
+      {loading && (<Spinner animation="border" className="ms-3 mt-3" variant="primary" />
+      )}
+      {posts.length > 0 && posts.map((post) => (
+        <ProfilePostCard
+          key={post.id}
+          content={post.content}
+          postId={post.id}
+      /> 
       ))}
+      
     </Col>
   )
 }

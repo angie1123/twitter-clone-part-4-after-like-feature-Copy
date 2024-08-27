@@ -5,7 +5,7 @@ import useLocalStorage from "use-local-storage"
 import { useNavigate } from "react-router-dom"
 export default function AuthPage() {
   const loginImage = "https://sig1.co/img-twitter-1"
-  const url="https://746dcf9b-393b-478b-8884-6857c551a34c-00-2fh96p197sqx9.picard.replit.dev"
+  const url="https://41ce83e1-3850-48e1-94dc-01052c77e83b-00-1nt9a693xda33.worf.replit.dev"
   // const [show, setShow] = useState(false)
   // const handleClose = () => setShow(false)
   // const handleShow = () => setShow(true)
