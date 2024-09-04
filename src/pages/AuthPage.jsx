@@ -1,46 +1,53 @@
-import { useEffect, useState } from "react"
+import {
+  GoogleAuthProvider,
+  signInWithPopup,
+  createUserWithEmailAndPassword,
+  getAuth,
+  signInWithEmailAndPassword
+ } from "firebase/auth"
+import { useContext, useEffect,useState } from "react"
 import { Button, Col, Form, Image, Modal, Row } from "react-bootstrap"
-import axios from "axios"
-import useLocalStorage from "use-local-storage"
 import { useNavigate } from "react-router-dom"
+import{AuthContext} from "../components/AuthProvider"
+
 export default function AuthPage() {
   const loginImage = "https://sig1.co/img-twitter-1"
-  const url="https://41ce83e1-3850-48e1-94dc-01052c77e83b-00-1nt9a693xda33.worf.replit.dev"
-  // const [show, setShow] = useState(false)
-  // const handleClose = () => setShow(false)
-  // const handleShow = () => setShow(true)
+ 
   const [modalShow, setModalShow] = useState(null)
   const handleShowSignUp = () => setModalShow("SignUp")
   const handleShowLogin=()=>setModalShow("Login")
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
-  const [authToken, setAuthToken] = useLocalStorage("authToken", "")
+  const navigate = useNavigate()
+  const auth = getAuth()
+  const { currentUser } = useContext(AuthContext)
+  
+  useEffect(() => {
+    if(currentUser) navigate("/profile")
+  },[currentUser,navigate])
+  
+  
   
   const [signUpError, setSignUpError] = useState("")
   const[loginError,setLoginError]=useState("")
   
-  const navigate = useNavigate()
   
-  useEffect(() => {
-    if (authToken) {
-      navigate("/profile")
-    }
-  }, [authToken, navigate])
+  // useEffect(() => {
+  //   if (authToken) {
+  //     navigate("/profile")
+  //   }
+  // }, [authToken, navigate])
   
   const handleSignUp = async (e) => {
     e.preventDefault()
     try {
-      //axios is javascript library for making HTTP request.it works with Node.js and in web browser
-      //use to request data from server,if the request is successful,the server responds with the reqested data
-      
-      /*axios takes tow main input
-      1.url  of api endpoint,in this case ,signup endpoint
-      2.data to send, in this case ,user information in json format
-      */
-      //using awai tot ask javascript to wait fot the server to send a response back bafore continuing the code
-      const res = await axios.post(`${url}/signup`, { username, password })
-      // console.log(res)
-      console.log(res.data.message)
+      //createUserWithEmailAndPassword is firebase function to create user
+      const res = await createUserWithEmailAndPassword(
+        auth,
+        username,
+        password
+      ) 
+      console.log(res.user)
     } catch (error) {
       /*when the response in api return with 400 status code, 
       axios detect 400 status code and throw an error*/ 
@@ -56,13 +63,9 @@ export default function AuthPage() {
   const handleLogin = async (e) => {
     e.preventDefault()
     try {
-      const res = await axios.post(`${url}/login`, { username, password })
-      if (res.data && res.data.auth === true && res.data.token) {
-        console.log(res)
-        setAuthToken(res.data.token)
-        console.log('Login was sucessfully,token saved')
+      await signInWithEmailAndPassword(auth,username,password)
     }
-    } catch (error) {
+     catch (error) {
      console.error(error)
       if (error.response.data.auth === false) {
         //if password is incorrect
@@ -71,6 +74,17 @@ export default function AuthPage() {
         //if username is incorrect
         setLoginError(error.response.data.message)
       }
+    }
+  }
+
+  const provider = new GoogleAuthProvider()
+  const handleGoogleLogin = async (e) => {
+    e.preventDefault()
+
+    try {
+      await signInWithPopup(auth, provider);
+    } catch (error) {
+      console.error(error)
     }
   }
   const handleClose=()=>setModalShow(null)
@@ -86,7 +100,8 @@ export default function AuthPage() {
         <h2 className="my-5" style={{ fontSize: 31 }}>Join Twitter Todoy. </h2>
       
         <Col sm={5} className="d-grid gap-2">
-          <Button className="rounded-pill" variant="outline-dark">
+          <Button className="rounded-pill" variant="outline-dark"
+            onClick={handleGoogleLogin}>
             <i className="bi bi-google"/> Sign up with Google
           </Button>
           <Button className="rounded-pill" variant="outline-dark">
