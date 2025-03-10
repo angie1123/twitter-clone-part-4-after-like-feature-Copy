@@ -1,7 +1,7 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit"
-import {collection,doc,getDoc,getDocs,setDoc, updateDoc,deleteDoc} from "firebase/firestore"
-import{db,storage} from "../../firebase"
-import { getDownloadURL,ref,uploadBytes } from "firebase/storage"
+import { collection, deleteDoc, doc, getDoc, getDocs, setDoc,updateDoc } from "firebase/firestore"
+import { db, storage } from "../../firebase"
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage"
 
 
 export const deletePost = createAsyncThunk(
@@ -24,7 +24,7 @@ export const updatePost = createAsyncThunk(
   "posts/updatePost",
   async ({ userId, postId, newPostContent, newFile }) => {
     try {
-      let newImageUrl
+      let newImageUrl;
       if (newFile) {//newFile store new image in updatePost modal component
         const imageRef = ref(storage, `posts/${newFile.name}`)
         const response = await uploadBytes(imageRef, newFile)
@@ -71,11 +71,14 @@ export const fetchPostsByUser = createAsyncThunk(
 
       docs=[{},{},{}]
        */
+      console.log(querySnapshot)
+      //docs is an document of array inside querySnapshot object
       const docs = querySnapshot.docs.map((doc) => ({
         id: doc.id,
           ...doc.data()//... (spread operator) is used to spread out all the key-value pairs from the doc.data() object into a new object.
       //doc.data() is a method that retrieves the data stored in the document as a plain JavaScript object.
       }))
+      console.log(docs)
     return docs
     } catch (error) {
       console.error(error)
@@ -86,7 +89,7 @@ export const fetchPostsByUser = createAsyncThunk(
 
 export const savePost = createAsyncThunk(
   "posts/savePost",
-  async ({ userId, postContent ,file}) => {
+  async ({ userId, postContent,file }) => {
     try {
       /*ref create a reference to specific location in your firebase storage,reference can be used to 
       upload,download,or manage files at that location*/
@@ -94,31 +97,48 @@ export const savePost = createAsyncThunk(
       storage： represent storage bucket where the files are stored
       `posts/${file.name}`：path within storage bucket where the file will be stored
       */
-      let imageUrl=""//when no file pass in ,this empty string will be extract in profile post card and assign to the image src of the post
+      
+      // let imageUrl=""//when no file pass in ,this empty string will be extract in profile post card and assign to the image src of the post
+      // if (file !== null) {
+      //   const imageRef = ref(storage, `posts/${file.name}`)//if no file pass in ,the file.name will be null
+      // const response = await uploadBytes(imageRef, file)//upload a file to firebase storage(where the file been upload,file to upload)
+      // console.log(response)
+      // console.log(file)
+      // imageUrl = await getDownloadURL(response.ref)//the .ref property in the response object is a Reference object. This Reference points to the exact location in Firebase Storage where the file was uploaded.
+      // console.log("console.log",imageUrl)
+      // }
+      
+      
+      let imageUrl = ""
       if (file !== null) {
-        const imageRef = ref(storage, `posts/${file.name}`)//if no file pass in ,the file.name will be null
-      const response = await uploadBytes(imageRef, file)//upload a file to firebase storage(where the file been upload,file to upload)
+        //ref to create reference to specific location(folder or file) in firebase storage
+      const imageRef = ref(storage, `posts/${file.name}`)
+      console.log(imageRef)
+      /*uploadBytes function in Firebase Storage is used to upload binary data (such as files) 
+      to a specific location in the Firebase Storage bucket.*/ 
+      const response=await uploadBytes(imageRef,file)
       console.log(response)
-      imageUrl = await getDownloadURL(response.ref)//the .ref property in the response object is a Reference object. This Reference points to the exact location in Firebase Storage where the file was uploaded.
+      imageUrl = await getDownloadURL(response.ref)
       console.log(imageUrl)
       }
       
+      
       //A collection in Firestore is a group of documents.
       const postsRef = collection(db, `users/${userId}/posts`)
-      // console.log(`users/${userId}/posts`)
-      const newPostRef = doc(postsRef)
-      console.log(newPostRef)
-      /*doc(postsRef): This function creates a new document reference in the Firestore
-       collection referenced by postsRef.
+      console.log(`users/${userId}/posts`)
+      const newPostRef = doc(postsRef)//get a refernces of where the doc will be store
+      console.log('newPostRef:',newPostRef)
+      /*doc(postsRef): This function creates a new document reference in postsRef
        
        By calling doc(postsRef) without specifying a document ID, 
        Firestore automatically generates a unique ID for the new document.
        */
       // console.log(postContent)
-      //setDoc() add data into newPostRef document
-      await setDoc(newPostRef, { content: postContent, likes: [],imageUrl })
+      //add content and likes field under newPostRef
+      await setDoc(newPostRef, { content: postContent, likes: [],imageUrl })//set new doc inside the newPostRef adress
       const newPost = await getDoc(newPostRef)
       console.log(newPost)
+      console.log(newPost.data())//{content: 'testing post', likes: Array(0)}
       const post = {
         id: newPost.id,
         ...newPost.data()//retrieve the content in the document
@@ -140,12 +160,12 @@ export const likePost = createAsyncThunk(
     try {
       /*The doc() function is a Firebase Firestore function used to create
        a reference to a specific document within a collection or subcollection.*/
-     
+     /*return an references of a document at specific path */
        const postRef = doc(db, `users/${userId}/posts/${postId}`)
       
-      //getDoc get all the data inside the document
+      //getDoc get the doc with "postRef" 
       const docSnap = await getDoc(postRef)
-      
+      console.log(docSnap.data())
       if (docSnap.exists()) {
         const postData = docSnap.data()
         /*
@@ -156,9 +176,11 @@ export const likePost = createAsyncThunk(
         
         */
         console.log(postData)
+
+        if(postData.likes.includes(userId))return postData//if user already like return the existing postData
         //spread previous user alredy like the post and add new user who like the post in the likes variable
         const likes = [...postData.likes, userId]
-        
+        console.log(likes)
         //it re-write the data inside the post with setDoc,it takes two parameter
         //1.A document path(postRef)
         //2.data to be added
@@ -167,7 +189,8 @@ export const likePost = createAsyncThunk(
         //if had two same key name, javascript will always takes the most updated one which is the right one
         //final answer iwll be{postData,likes}={content:'Hello from firebase',likes:[userID1,userID2,userID3,userID4]}
 
-        await setDoc(postRef, {...postData, likes })
+        await setDoc(postRef, { ...postData, likes })
+        console.log(postData)
       }
       return {userId,postId}
     } catch (error) {
@@ -191,10 +214,10 @@ export const removeLikeFromPost = createAsyncThunk(
         values stored in the document.
         */
         const postData = docSnap.data()
-        console.log(postData)
+        console.log({ postData })
         const likes = postData.likes.filter((id) => id !== userId)
         
-        await setDoc(postRef,{...postData,likes})
+        await setDoc(postRef,{...postData,likes})//update to the latest likes array
       }
 
       return {userId,postId}
@@ -228,7 +251,8 @@ rejected: Dispatched when the async function fails.
       state.loading=false
       })
       .addCase(savePost.fulfilled, (state, action) => {
-      state.posts=[action.payload,...state.posts]//[return value,previous state post value]
+        state.posts = [action.payload, ...state.posts]
+        //action.payload ={post.id,post.data()} from post return from savePost async thunk
       })
       .addCase(likePost.fulfilled, (state, action) => {
         const { userId, postId } = action.payload
@@ -236,7 +260,9 @@ rejected: Dispatched when the async function fails.
         const postIndex = state.posts.findIndex((post) => post.id === postId)
         
         if (postIndex !== -1) {
+          console.log(state.posts[postIndex].likes.push(userId))
           state.posts[postIndex].likes.push(userId)
+          //push new userId to the posts state likes property
         }
 
       })
@@ -246,8 +272,9 @@ rejected: Dispatched when the async function fails.
         const postIndex = state.posts.findIndex((post) => post.id === postId)
         if (postIndex !== -1) {
           state.posts[postIndex].likes = state.posts[postIndex].likes.filter(
-            (id)=>id!==userId
+            (id) => id !== userId
           )
+          console.log(state.posts[postIndex].likes)
         }
       })
       .addCase(updatePost.fulfilled, (state, action) => {

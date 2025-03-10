@@ -2,13 +2,13 @@ import {
   GoogleAuthProvider,
   signInWithPopup,
   createUserWithEmailAndPassword,
-  getAuth,
   signInWithEmailAndPassword
  } from "firebase/auth"
 import { useContext, useEffect,useState } from "react"
 import { Button, Col, Form, Image, Modal, Row } from "react-bootstrap"
 import { useNavigate } from "react-router-dom"
 import{AuthContext} from "../components/AuthProvider"
+import { auth } from "../firebase"
 
 export default function AuthPage() {
   const loginImage = "https://sig1.co/img-twitter-1"
@@ -19,24 +19,20 @@ export default function AuthPage() {
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
   const navigate = useNavigate()
-  const auth = getAuth()
-  const { currentUser } = useContext(AuthContext)
-  
+
+  const { currentUser } = useContext(AuthContext)//get from const AuthContext=useContext(),and AuthContext.Provider had the value of {currentUser}
   useEffect(() => {
-    if(currentUser) navigate("/profile")
-  },[currentUser,navigate])
+    if (currentUser) {
+      console.log(currentUser)
+      navigate("/profile")
+    }
+  },[currentUser,navigate])//when the page change to "/profile" ,it cause the navigate run again
   
   
   
   const [signUpError, setSignUpError] = useState("")
   const[loginError,setLoginError]=useState("")
   
-  
-  // useEffect(() => {
-  //   if (authToken) {
-  //     navigate("/profile")
-  //   }
-  // }, [authToken, navigate])
   
   const handleSignUp = async (e) => {
     e.preventDefault()

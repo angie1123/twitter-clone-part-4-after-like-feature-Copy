@@ -1,14 +1,19 @@
 import { useContext,useState } from "react"
 import { Button, Col, Image, Row } from "react-bootstrap"
 import { useDispatch } from "react-redux"
-import {deletePost, likePost,removeLikeFromPost } from "../features/posts/postsSlice"
+import { deletePost, likePost,removeLikeFromPost } from "../features/posts/postsSlice"
 import { AuthContext } from "./AuthProvider"
-import UpdatePostModal from "./UpdatePostModal"
+import UpdatePostModal  from "./UpdatePostModal"
 
 export default function ProfilePostCard({ post}) {
-//{id:postId} rename id to postId
-  const { content, id:postId, imageUrl } = post
-  const [likes, setLikes] = useState([])
+  //{id:postId} rename id to postId
+  console.log(post.likes)
+  const { content, id:postId, imageUrl } = post//get from state.posts.posts ,pass from ProfileMidBody
+  /*content and id from post,
+  post is got from state.posts.posts from ProfileMidBody
+  */
+  const [likes, setLikes] = useState(post.likes || [])
+  console.log(likes)
   const dispatch = useDispatch()
   const { currentUser } = useContext(AuthContext)
   const userId=currentUser.uid
@@ -27,7 +32,7 @@ export default function ProfilePostCard({ post}) {
   
   //add userID to likes array
   const addToLikes = () => {
-    setLikes([...likes, userId])
+    setLikes([...likes, userId])//current likes=[],when called setLikes[...likes,userId]=[null,userId]
     dispatch(likePost({userId,postId}))
   }
      
@@ -76,20 +81,20 @@ export default function ProfilePostCard({ post}) {
           <Button variant="light">
             <i className="bi bi-upload"></i>
           </Button>
-          <Button variant="light">
+        <Button variant="light">
             <i
               className="bi bi-pencil-square"
             onClick={handleShowUpdateModal}/>
           </Button>
           <Button variant="light" onClick={handleDelete}>
             <i className="bi bi-trash"/>
-          </Button>
+          </Button> 
           <UpdatePostModal
             show={showUpdateModal}
             handleClose={handleCloseUpdateModal}
             postId={postId}
             originalPostContent={content}
-          />
+          /> 
         </div>
       </Col>
       </Row>

@@ -3,23 +3,24 @@ import { useContext, useEffect } from "react"
 import{AuthContext} from "./AuthProvider"
 import { Button, Col, Image, Nav, Row, Spinner, } from "react-bootstrap"
 import ProfilePostCard from "./ProfilePostCard"
-import {  useDispatch, useSelector } from "react-redux"
+import {   useDispatch, useSelector } from "react-redux"
 import { fetchPostsByUser } from "../features/posts/postsSlice"
 
 
 export default function ProfileMidBody() {
-  const url = "https://pbs.twimg.com/profile_banners/83072625/1602845571/1500x500"
-  const pic="https://pbs.twimg.com/profile_images/1587405892437221376/h167Jlb2_400x400.jpg"
+  const url = "https://i.pinimg.com/originals/33/8e/de/338ede5f9f949b9c4cc6c1c0c15c6a00.jpg"
+  const pic="https://static.vecteezy.com/system/resources/previews/022/538/039/original/yellow-face-wow-emoji-surprised-shocked-emoticon-3d-render-illustration-free-png.png"
 
   const dispatch=useDispatch()
   const posts = useSelector((state) => state.posts.posts)
   const loading = useSelector((state) => state.posts.loading)
-  console.log(posts)
+//   console.log(posts)
   const { currentUser } = useContext(AuthContext)
   
   useEffect(() => {
   dispatch(fetchPostsByUser(currentUser.uid))
-},[dispatch,currentUser])
+  }, [dispatch, currentUser])
+  // Any variable, prop, or function that you reference inside the useEffect should be included in the dependency array unless you have a clear reason not to.
 
   return (
     <Col sm={6} className="bg-light" style={{ border: "1px solid lightgrey" }}>

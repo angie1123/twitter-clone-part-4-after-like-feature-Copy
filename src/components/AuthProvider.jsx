@@ -22,7 +22,7 @@ export function AuthProvider({ children }) {
   }, [])
   
 
-//create an object,this equivalent to { currentUser: currentUser }
+//destructure the currentUser object from user object
   const value = { currentUser} 
   console.log(value)
   
