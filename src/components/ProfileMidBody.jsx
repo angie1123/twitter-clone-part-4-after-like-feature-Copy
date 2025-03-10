@@ -47,15 +47,11 @@ export default function ProfileMidBody() {
       </Row>
 
       <p className="mt-5" style={{ margin: 0, fontWeight: "bold", fontSize: "15px" }}>
-        Haris
+        Angie
       </p>
 
-      <p style={{marginBottom:"2px"}}>@haris.samingan</p>
+      <p style={{marginBottom:"2px"}}>@angie.hong</p>
       
-      <p>I help people switch careers to be a software developer at sigmaschool.co</p>
-
-      <p>Entrepreneur</p>
-    
       <p>
         <strong>271</strong> Following <strong>610</strong> Followers
       </p>

@@ -22,7 +22,7 @@ export default function ProfilePostCard({ post}) {
   const isLiked=likes.includes(userId)
   
  
-  const pic = "https://pbs.twimg.com/profile_images/1587405892437221376/h167Jlb2_400x400.jpg"
+  const pic = "https://static.vecteezy.com/system/resources/previews/022/538/039/original/yellow-face-wow-emoji-surprised-shocked-emoticon-3d-render-illustration-free-png.png"
   const [showUpdateModal, setShowUpdateModal] = useState(false)
   
   const handleShowUpdateModal = () => setShowUpdateModal(true)
@@ -59,8 +59,8 @@ export default function ProfilePostCard({ post}) {
       </Col>
       
       <Col>
-        <strong>Haris</strong>
-        <span>@haris.samingan . Apr 16</span>
+        <strong>Angie</strong>
+        <span>@angie.hong Apr 16</span>
         <p>{content}</p>
         <Image src={imageUrl} style={{width:150}}/>
         <div className="d-flex justify-content-between">
