@@ -21,14 +21,15 @@ export default function ProfilePage() {
 // },[currentUser,navigate])
   useEffect(() => {
      if (!currentUser) {
-    navigate('/login')
-    return null
+    navigate("/login")
   }
-  })
+  },[currentUser,navigate])
  
 
-  const handleLogout = () => {
-    auth.signOut()
+  const handleLogout =async () => {
+    await auth.signOut()
+    navigate("/login")
+    
   }
 
   
